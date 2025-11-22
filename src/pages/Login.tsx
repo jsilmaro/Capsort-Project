@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { ForgotPasswordDialog } from '../components/ForgotPasswordDialog';
 import { Checkbox } from '../components/ui/checkbox';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
 import imgScreenshot202510211430581 from "figma:asset/3d25bb0db39ceaa8384a23d07aeb10c205d94b2c.png";
 import imgMail1 from "figma:asset/04473dd56e55d0b26fdb1b2552a8ecf8338b14c8.png";
 import imgPass1 from "figma:asset/12622181b4587ff8a8dfde9e6073e4eac6d0f3b5.png";
@@ -14,27 +15,53 @@ const ADMIN_PASSWORD = 'admin123';
 
 export default function Login() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({
+  const [activeTab, setActiveTab] = useState('student');
+  
+  // Student form data
+  const [studentFormData, setStudentFormData] = useState({
     email: '',
     password: '',
     remember: false
   });
-  const [showPassword, setShowPassword] = useState(false);
+  
+  // Admin form data
+  const [adminFormData, setAdminFormData] = useState({
+    email: '',
+    password: '',
+    remember: false
+  });
+  
+  const [showStudentPassword, setShowStudentPassword] = useState(false);
+  const [showAdminPassword, setShowAdminPassword] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
-  const [error, setError] = useState('');
+  const [studentError, setStudentError] = useState('');
+  const [adminError, setAdminError] = useState('');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleStudentSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setStudentError('');
+    
+    // Check if trying to use admin credentials in student login
+    if (studentFormData.email === ADMIN_EMAIL) {
+      setStudentError('Admin accounts cannot login here. Please use the Admin tab.');
+      return;
+    }
+    
+    // Regular student/user login
+    navigate('/student/dashboard');
+  };
 
-      // Check if admin credentials
-    if (formData.email === ADMIN_EMAIL && formData.password === ADMIN_PASSWORD) {
+  const handleAdminSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setAdminError('');
+    
+    // Check if admin credentials
+    if (adminFormData.email === ADMIN_EMAIL && adminFormData.password === ADMIN_PASSWORD) {
       navigate('/admin/dashboard');
-    } else if (formData.email === ADMIN_EMAIL && formData.password !== ADMIN_PASSWORD) {
-      setError('Invalid admin password');
+    } else if (adminFormData.email === ADMIN_EMAIL && adminFormData.password !== ADMIN_PASSWORD) {
+      setAdminError('Invalid admin password');
     } else {
-      // Regular student/user login
-      navigate('/student/dashboard');
+      setAdminError('Invalid admin credentials');
     }
   };
 
@@ -66,108 +93,244 @@ export default function Login() {
         Capstone Archiving and Sorting System
       </p>
 
-      {/* Email Address Label */}
-      <p className="absolute font-['Poppins'] leading-[normal] left-[78px] not-italic text-[16px] text-black text-nowrap top-[357px] whitespace-pre">
-        Email Address
-      </p>
+      {/* Role Selection Tabs */}
+      <div className="absolute left-[78px] top-[345px] w-[367px]">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <TabsList className="grid w-full grid-cols-2 bg-white border border-[#1a1851] rounded-[8px] h-[44px]">
+            <TabsTrigger 
+              value="student" 
+              className="data-[state=active]:bg-[#1a1851] data-[state=active]:text-white font-['Poppins'] rounded-[6px]"
+            >
+              Student Login
+            </TabsTrigger>
+            <TabsTrigger 
+              value="admin"
+              className="data-[state=active]:bg-[#1a1851] data-[state=active]:text-white font-['Poppins'] rounded-[6px]"
+            >
+              Admin Login
+            </TabsTrigger>
+          </TabsList>
 
-      {/* Email Input */}
-      <form onSubmit={handleSubmit}>
-        <div className="absolute bg-white h-[48px] left-[78px] rounded-[8px] top-[388px] w-[367px]">
-          <div aria-hidden="true" className="absolute border border-[#1a1851] border-solid inset-0 pointer-events-none rounded-[8px]" />
-          <div className="absolute left-[21px] size-[20px] top-[14px]">
-            <img 
-              alt="" 
-              className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
-              src={imgMail1} 
-            />
-          </div>
-          <input
-            type="email"
-            placeholder="student@gmail.com"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
-            required
-          />
-        </div>
+          {/* Student Login Form */}
+          <TabsContent value="student" className="mt-6">
+            <form onSubmit={handleStudentSubmit}>
+              {/* Email Address Label */}
+              <p className="font-['Poppins'] leading-[normal] not-italic text-[16px] text-black text-nowrap mb-2">
+                Email Address
+              </p>
 
-        {/* Password Label */}
-        <p className="absolute font-['Poppins'] leading-[normal] left-[78px] not-italic text-[16px] text-black text-nowrap top-[448px] whitespace-pre">
-          Password
-        </p>
+              {/* Email Input */}
+              <div className="relative bg-white h-[48px] rounded-[8px] mb-4">
+                <div aria-hidden="true" className="absolute border border-[#1a1851] border-solid inset-0 pointer-events-none rounded-[8px]" />
+                <div className="absolute left-[21px] size-[20px] top-[14px]">
+                  <img 
+                    alt="" 
+                    className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
+                    src={imgMail1} 
+                  />
+                </div>
+                <input
+                  type="email"
+                  placeholder="student@gmail.com"
+                  value={studentFormData.email}
+                  onChange={(e) => setStudentFormData({ ...studentFormData, email: e.target.value })}
+                  className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
+                  required
+                />
+              </div>
 
-        {/* Password Input */}
-        <div className="absolute bg-white h-[48px] left-[78px] rounded-[8px] top-[479px] w-[367px]">
-          <div aria-hidden="true" className="absolute border border-[#1a1851] border-solid inset-0 pointer-events-none rounded-[8px]" />
-          <div className="absolute left-[21px] size-[20px] top-[14px]">
-            <img 
-              alt="" 
-              className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
-              src={imgPass1} 
-            />
-          </div>
-          <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Enter password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
-            required
-          />
-          <button
-            type="button"
-            onClick={() => setShowPassword(!showPassword)}
-            className="absolute left-[329px] size-[20px] top-[14px] cursor-pointer"
-          >
-            <img 
-              alt="" 
-              className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
-              src={imgShow1} 
-            />
-          </button>
-        </div>
+              {/* Password Label */}
+              <p className="font-['Poppins'] leading-[normal] not-italic text-[16px] text-black text-nowrap mb-2">
+                Password
+              </p>
 
-        {/* Remember Me Checkbox */}
-        <div className="absolute left-[78px] top-[543px] flex items-center gap-2 z-10">
-          <Checkbox
-            checked={formData.remember}
-            onCheckedChange={(checked) => setFormData({ ...formData, remember: checked })}
-          />
-          <p className="font-['Poppins'] leading-[normal] not-italic text-[#929292] text-[14px] text-nowrap whitespace-pre">
-            Remember me
-          </p>
-        </div>
+              {/* Password Input */}
+              <div className="relative bg-white h-[48px] rounded-[8px] mb-4">
+                <div aria-hidden="true" className="absolute border border-[#1a1851] border-solid inset-0 pointer-events-none rounded-[8px]" />
+                <div className="absolute left-[21px] size-[20px] top-[14px]">
+                  <img 
+                    alt="" 
+                    className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
+                    src={imgPass1} 
+                  />
+                </div>
+                <input
+                  type={showStudentPassword ? 'text' : 'password'}
+                  placeholder="Enter password"
+                  value={studentFormData.password}
+                  onChange={(e) => setStudentFormData({ ...studentFormData, password: e.target.value })}
+                  className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowStudentPassword(!showStudentPassword)}
+                  className="absolute left-[329px] size-[20px] top-[14px] cursor-pointer"
+                >
+                  <img 
+                    alt="" 
+                    className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
+                    src={imgShow1} 
+                  />
+                </button>
+              </div>
 
-        {/* Forgot Password */}
-        <button
-          type="button"
-          onClick={() => setForgotPasswordOpen(true)}
-          className="absolute font-['Poppins'] leading-[normal] left-[445px] not-italic text-[#1a1851] text-[14px] text-nowrap text-right top-[540px] translate-x-[-100%] whitespace-pre hover:underline cursor-pointer"
-        >
-          Forgot Password?
-        </button>
+              {/* Error Message */}
+              {studentError && (
+                <div className="mb-2">
+                  <p className="font-['Poppins'] text-[12px] text-red-600">
+                    {studentError}
+                  </p>
+                </div>
+              )}
 
-        {/* Login Button */}
-        <button
-          type="submit"
-          className="absolute bg-[#1a1851] h-[48px] left-[78px] rounded-[8px] top-[581px] w-[367px] hover:bg-[#0B1441] transition-colors cursor-pointer"
-        >
-          <p className="font-['Poppins'] leading-[normal] not-italic text-[18px] text-center text-nowrap text-white whitespace-pre">
-            Log in
-          </p>
-        </button>
+              {/* Remember Me and Forgot Password Row */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Checkbox
+                    checked={studentFormData.remember}
+                    onCheckedChange={(checked) => setStudentFormData({ ...studentFormData, remember: checked as boolean })}
+                  />
+                  <p className="font-['Poppins'] leading-[normal] not-italic text-[#929292] text-[14px] text-nowrap whitespace-pre">
+                    Remember me
+                  </p>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={() => setForgotPasswordOpen(true)}
+                  className="font-['Poppins'] leading-[normal] not-italic text-[#1a1851] text-[14px] text-nowrap hover:underline cursor-pointer"
+                >
+                  Forgot Password?
+                </button>
+              </div>
 
-        {/* Sign Up Link */}
-        <Link to="/signup">
-          <div className="absolute left-[110px] top-[663px] w-[303px]">
-            <p className="font-['Poppins'] leading-[normal] not-italic text-[#1a1851] text-[14px] text-center text-nowrap whitespace-pre">
-              <span>Don't have an account? </span>
-              <span className="font-['Poppins'] hover:underline cursor-pointer">Sign up here.</span>
-            </p>
-          </div>
-        </Link>
-      </form>
+              {/* Login Button */}
+              <button
+                type="submit"
+                className="w-full bg-[#1a1851] h-[48px] rounded-[8px] hover:bg-[#0B1441] transition-colors cursor-pointer mb-4"
+              >
+                <p className="font-['Poppins'] leading-[normal] not-italic text-[18px] text-center text-nowrap text-white whitespace-pre">
+                  Log in
+                </p>
+              </button>
+
+              {/* Sign Up Link */}
+              <Link to="/signup">
+                <div className="text-center">
+                  <p className="font-['Poppins'] leading-[normal] not-italic text-[#1a1851] text-[14px] text-center text-nowrap whitespace-pre">
+                    <span>Don't have an account? </span>
+                    <span className="font-['Poppins'] hover:underline cursor-pointer">Sign up here.</span>
+                  </p>
+                </div>
+              </Link>
+            </form>
+          </TabsContent>
+
+          {/* Admin Login Form */}
+          <TabsContent value="admin" className="mt-6">
+            <form onSubmit={handleAdminSubmit}>
+              {/* Email Address Label */}
+              <p className="font-['Poppins'] leading-[normal] not-italic text-[16px] text-black text-nowrap mb-2">
+                Admin Email
+              </p>
+
+              {/* Email Input */}
+              <div className="relative bg-white h-[48px] rounded-[8px] mb-4">
+                <div aria-hidden="true" className="absolute border border-[#1a1851] border-solid inset-0 pointer-events-none rounded-[8px]" />
+                <div className="absolute left-[21px] size-[20px] top-[14px]">
+                  <img 
+                    alt="" 
+                    className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
+                    src={imgMail1} 
+                  />
+                </div>
+                <input
+                  type="email"
+                  placeholder="admin@capsort.com"
+                  value={adminFormData.email}
+                  onChange={(e) => setAdminFormData({ ...adminFormData, email: e.target.value })}
+                  className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
+                  required
+                />
+              </div>
+
+              {/* Password Label */}
+              <p className="font-['Poppins'] leading-[normal] not-italic text-[16px] text-black text-nowrap mb-2">
+                Admin Password
+              </p>
+
+              {/* Password Input */}
+              <div className="relative bg-white h-[48px] rounded-[8px] mb-4">
+                <div aria-hidden="true" className="absolute border border-[#1a1851] border-solid inset-0 pointer-events-none rounded-[8px]" />
+                <div className="absolute left-[21px] size-[20px] top-[14px]">
+                  <img 
+                    alt="" 
+                    className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
+                    src={imgPass1} 
+                  />
+                </div>
+                <input
+                  type={showAdminPassword ? 'text' : 'password'}
+                  placeholder="Enter admin password"
+                  value={adminFormData.password}
+                  onChange={(e) => setAdminFormData({ ...adminFormData, password: e.target.value })}
+                  className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowAdminPassword(!showAdminPassword)}
+                  className="absolute left-[329px] size-[20px] top-[14px] cursor-pointer"
+                >
+                  <img 
+                    alt="" 
+                    className="absolute inset-0 max-w-none object-50%-50% object-cover pointer-events-none size-full" 
+                    src={imgShow1} 
+                  />
+                </button>
+              </div>
+
+              {/* Error Message */}
+              {adminError && (
+                <div className="mb-2">
+                  <p className="font-['Poppins'] text-[12px] text-red-600">
+                    {adminError}
+                  </p>
+                </div>
+              )}
+
+              {/* Remember Me */}
+              <div className="flex items-center gap-2 mb-4">
+                <Checkbox
+                  checked={adminFormData.remember}
+                  onCheckedChange={(checked) => setAdminFormData({ ...adminFormData, remember: checked as boolean })}
+                />
+                <p className="font-['Poppins'] leading-[normal] not-italic text-[#929292] text-[14px] text-nowrap whitespace-pre">
+                  Remember me
+                </p>
+              </div>
+
+              {/* Login Button */}
+              <button
+                type="submit"
+                className="w-full bg-[#1a1851] h-[48px] rounded-[8px] hover:bg-[#0B1441] transition-colors cursor-pointer"
+              >
+                <p className="font-['Poppins'] leading-[normal] not-italic text-[18px] text-center text-nowrap text-white whitespace-pre">
+                  Log in as Admin
+                </p>
+              </button>
+
+              {/* Admin Note */}
+              <div className="mt-4 p-3 bg-[#FFD338]/10 border border-[#FFD338]/30 rounded-[8px]">
+                <p className="font-['Poppins'] text-[12px] text-[#1a1851] text-center">
+                  Admin access is restricted. Only authorized personnel with valid credentials can login.
+                </p>
+              </div>
+            </form>
+          </TabsContent>
+        </Tabs>
+      </div>
 
       {/* Footer */}
       <div className="absolute font-['Poppins'] leading-[normal] left-[262.5px] not-italic text-[#6c6565] text-[10px] text-center text-nowrap top-[954px] translate-x-[-50%] whitespace-pre">
