@@ -8,6 +8,10 @@ import imgPass1 from "figma:asset/12622181b4587ff8a8dfde9e6073e4eac6d0f3b5.png";
 import imgShow1 from "figma:asset/7fa0b269fdc7d590764fd2cb0a2729811799234e.png";
 import imgImageRemovebgPreview71 from "figma:asset/1f6c2a7cc84f53e05c54479d3409ebb58581e6a0.png";
 
+// Admin credentials
+const ADMIN_EMAIL = 'admin@capsort.com';
+const ADMIN_PASSWORD = 'admin123';
+
 export default function Login() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
@@ -17,11 +21,21 @@ export default function Login() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
+  const [error, setError] = useState('');
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Navigate to student dashboard (backend will handle routing later)
-    navigate('/student/dashboard');
+    setError('');
+
+      // Check if admin credentials
+    if (formData.email === ADMIN_EMAIL && formData.password === ADMIN_PASSWORD) {
+      navigate('/admin/dashboard');
+    } else if (formData.email === ADMIN_EMAIL && formData.password !== ADMIN_PASSWORD) {
+      setError('Invalid admin password');
+    } else {
+      // Regular student/user login
+      navigate('/student/dashboard');
+    }
   };
 
   return (
