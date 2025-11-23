@@ -64,7 +64,7 @@ export function Navbar({ role = 'guest', onLogout }: NavbarProps) {
                 >
                   Projects
                 </Link>
-                <Link to="/student/saved" className="font-['Poppins'] text-[18px] text-black">
+                <Link to="/student/saved-projects" className="font-['Poppins'] text-[18px] text-black">
                   Saved
                 </Link>
                 <Link to="/student/about" className="font-['Poppins'] text-[18px] text-black">
