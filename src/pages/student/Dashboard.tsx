@@ -98,10 +98,7 @@ export default function StudentDashboard() {
 
             {/* Student Profile */}
             <div 
-              
-              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity cursor-pointer hover:opacity-80 transition-opacity"
-              onClick={() => navigate('/student/profile')}
-            
+              className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity"
               onClick={() => navigate('/student/profile')}
             >
               <span className="font-['Poppins'] text-[18px] text-black">Student Name</span>

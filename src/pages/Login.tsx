@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 import { ForgotPasswordDialog } from '../components/ForgotPasswordDialog';
 import { Checkbox } from '../components/ui/checkbox';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/tabs';
@@ -9,12 +10,9 @@ import imgPass1 from "figma:asset/12622181b4587ff8a8dfde9e6073e4eac6d0f3b5.png";
 import imgShow1 from "figma:asset/7fa0b269fdc7d590764fd2cb0a2729811799234e.png";
 import imgImageRemovebgPreview71 from "figma:asset/1f6c2a7cc84f53e05c54479d3409ebb58581e6a0.png";
 
-// Admin credentials
-const ADMIN_EMAIL = 'admin@capsort.com';
-const ADMIN_PASSWORD = 'admin123';
-
 export default function Login() {
   const navigate = useNavigate();
+  const { login, adminLogin } = useAuth();
   const [activeTab, setActiveTab] = useState('student');
   
   // Student form data
@@ -36,32 +34,46 @@ export default function Login() {
   const [forgotPasswordOpen, setForgotPasswordOpen] = useState(false);
   const [studentError, setStudentError] = useState('');
   const [adminError, setAdminError] = useState('');
+  const [studentLoading, setStudentLoading] = useState(false);
+  const [adminLoading, setAdminLoading] = useState(false);
 
-  const handleStudentSubmit = (e: React.FormEvent) => {
+  const handleStudentSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setStudentError('');
+    setStudentLoading(true);
     
-    // Check if trying to use admin credentials in student login
-    if (studentFormData.email === ADMIN_EMAIL) {
-      setStudentError('Admin accounts cannot login here. Please use the Admin tab.');
-      return;
+    try {
+      const result = await login(studentFormData.email, studentFormData.password);
+      
+      if (result.success) {
+        navigate('/student/dashboard');
+      } else {
+        setStudentError(result.error || 'Login failed');
+      }
+    } catch (error) {
+      setStudentError('An unexpected error occurred');
+    } finally {
+      setStudentLoading(false);
     }
-    
-    // Regular student/user login
-    navigate('/student/dashboard');
   };
 
-  const handleAdminSubmit = (e: React.FormEvent) => {
+  const handleAdminSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setAdminError('');
+    setAdminLoading(true);
     
-    // Check if admin credentials
-    if (adminFormData.email === ADMIN_EMAIL && adminFormData.password === ADMIN_PASSWORD) {
-      navigate('/admin/dashboard');
-    } else if (adminFormData.email === ADMIN_EMAIL && adminFormData.password !== ADMIN_PASSWORD) {
-      setAdminError('Invalid admin password');
-    } else {
-      setAdminError('Invalid admin credentials');
+    try {
+      const result = await adminLogin(adminFormData.email, adminFormData.password);
+      
+      if (result.success) {
+        navigate('/admin/dashboard');
+      } else {
+        setAdminError(result.error || 'Admin login failed');
+      }
+    } catch (error) {
+      setAdminError('An unexpected error occurred');
+    } finally {
+      setAdminLoading(false);
     }
   };
 
@@ -136,6 +148,7 @@ export default function Login() {
                   onChange={(e) => setStudentFormData({ ...studentFormData, email: e.target.value })}
                   className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
                   required
+                  disabled={studentLoading}
                 />
               </div>
 
@@ -161,6 +174,7 @@ export default function Login() {
                   onChange={(e) => setStudentFormData({ ...studentFormData, password: e.target.value })}
                   className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
                   required
+                  disabled={studentLoading}
                 />
                 <button
                   type="button"
@@ -208,10 +222,11 @@ export default function Login() {
               {/* Login Button */}
               <button
                 type="submit"
-                className="w-full bg-[#1a1851] h-[48px] rounded-[8px] hover:bg-[#0B1441] transition-colors cursor-pointer mb-4"
+                disabled={studentLoading}
+                className="w-full bg-[#1a1851] h-[48px] rounded-[8px] hover:bg-[#0B1441] transition-colors cursor-pointer mb-4 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <p className="font-['Poppins'] leading-[normal] not-italic text-[18px] text-center text-nowrap text-white whitespace-pre">
-                  Log in
+                  {studentLoading ? 'Logging in...' : 'Log in'}
                 </p>
               </button>
 
@@ -252,6 +267,7 @@ export default function Login() {
                   onChange={(e) => setAdminFormData({ ...adminFormData, email: e.target.value })}
                   className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
                   required
+                  disabled={adminLoading}
                 />
               </div>
 
@@ -277,6 +293,7 @@ export default function Login() {
                   onChange={(e) => setAdminFormData({ ...adminFormData, password: e.target.value })}
                   className="absolute left-[61px] top-[14px] bg-transparent border-0 outline-none font-['Poppins'] text-[14px] text-black placeholder:text-[#929292] w-[280px]"
                   required
+                  disabled={adminLoading}
                 />
                 <button
                   type="button"
@@ -314,10 +331,11 @@ export default function Login() {
               {/* Login Button */}
               <button
                 type="submit"
-                className="w-full bg-[#1a1851] h-[48px] rounded-[8px] hover:bg-[#0B1441] transition-colors cursor-pointer"
+                disabled={adminLoading}
+                className="w-full bg-[#1a1851] h-[48px] rounded-[8px] hover:bg-[#0B1441] transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <p className="font-['Poppins'] leading-[normal] not-italic text-[18px] text-center text-nowrap text-white whitespace-pre">
-                  Log in as Admin
+                  {adminLoading ? 'Logging in...' : 'Log in as Admin'}
                 </p>
               </button>
 

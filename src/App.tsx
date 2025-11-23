@@ -1,6 +1,8 @@
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './contexts/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
 
-// Auth Pages (Unified)
+// Auth Pages
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 
@@ -23,32 +25,90 @@ import AdminProfile from './pages/admin/Profile';
 
 export default function App() {
   return (
-    <Router>
-      <Routes>
-        {/* Auth Routes (Unified) */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
+    <AuthProvider>
+      <Router>
+        <Routes>
+          {/* Auth Routes (Public) */}
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<Signup />} />
 
-        {/* Guest Routes */}
-        <Route path="/" element={<Splash />} />
-        <Route path="/projects" element={<GuestProjects />} />
-        <Route path="/about" element={<GuestAbout />} />
+          {/* Guest Routes (Public) */}
+          <Route path="/" element={<Splash />} />
+          <Route path="/projects" element={<GuestProjects />} />
+          <Route path="/about" element={<GuestAbout />} />
 
-        {/* Student Routes */}
-        <Route path="/student/dashboard" element={<StudentDashboard />} />
-        <Route path="/student/saved-projects" element={<SavedProjects />} />
-        <Route path="/student/profile" element={<StudentProfile />} />
-        <Route path="/student/about" element={<StudentAbout />} />
+          {/* Student Routes (Protected) */}
+          <Route 
+            path="/student/dashboard" 
+            element={
+              <ProtectedRoute requireStudent>
+                <StudentDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/student/saved-projects" 
+            element={
+              <ProtectedRoute requireStudent>
+                <SavedProjects />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/student/profile" 
+            element={
+              <ProtectedRoute requireStudent>
+                <StudentProfile />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/student/about" 
+            element={
+              <ProtectedRoute requireStudent>
+                <StudentAbout />
+              </ProtectedRoute>
+            } 
+          />
 
-        {/* Admin Routes */}
-        <Route path="/admin/dashboard" element={<AdminDashboard />} />
-        <Route path="/admin/analytics" element={<Analytics />} />
-        <Route path="/admin/about" element={<AboutEditable />} />
-        <Route path="/admin/profile" element={<AdminProfile />} />
+          {/* Admin Routes (Protected) */}
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminDashboard />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/analytics" 
+            element={
+              <ProtectedRoute requireAdmin>
+                <Analytics />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/about" 
+            element={
+              <ProtectedRoute requireAdmin>
+                <AboutEditable />
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/profile" 
+            element={
+              <ProtectedRoute requireAdmin>
+                <AdminProfile />
+              </ProtectedRoute>
+            } 
+          />
 
-        {/* Catch all */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-    </Router>
+          {/* Catch all */}
+          <Route path="*" element={<Navigate to="/" replace />} />
+        </Routes>
+      </Router>
+    </AuthProvider>
   );
 }
