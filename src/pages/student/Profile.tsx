@@ -9,8 +9,8 @@ import { Label } from '../../components/ui/label';
 import { CapstoneCard } from '../../components/CapstoneCard';
 import { Edit, FileText } from 'lucide-react';
 
-const mockUserPapers = [
-  { id: 1, title: 'My Capstone Project', author: 'Current User', year: 2024, field: 'IoT' },
+const mockSavedPapers = [
+  // This will be populated from the backend with papers the student has saved
 ];
 
 export default function StudentProfile() {
@@ -113,7 +113,7 @@ export default function StudentProfile() {
                       Saved Papers
                     </span>
                     <span className="font-['Poppins'] text-[18px] text-[#1a1851]">
-                      {mockUserPapers.length}
+                      {mockSavedPapers.length}
                     </span>
                   </div>
                   <div className="flex items-center justify-between">
@@ -139,15 +139,24 @@ export default function StudentProfile() {
             </Card>
           </div>
 
-          {/* Uploaded Papers */}
+          {/* Saved Papers */}
           <div className="lg:col-span-2">
-            <h2 className="font-['Poppins'] text-[28px] text-black mb-6">
-              My Uploaded Papers
-            </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="font-['Poppins'] text-[28px] text-black">
+                My Saved Papers
+              </h2>
+              <Button 
+                onClick={() => navigate('/student/saved-projects')}
+                variant="outline"
+                className="rounded-[8px]"
+              >
+                View All Saved
+              </Button>
+            </div>
 
-            {mockUserPapers.length > 0 ? (
+            {mockSavedPapers.length > 0 ? (
               <div className="grid gap-6">
-                {mockUserPapers.map((paper) => (
+                {mockSavedPapers.map((paper) => (
                   <CapstoneCard
                     key={paper.id}
                     title={paper.title}
